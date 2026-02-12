@@ -11,16 +11,21 @@ type Record struct {
 	Description string 	`json:"description"`
 }
 
+var records []Record
+
 func main() {
 
-	var record Record
-	readFile(&record)
+	readFile(&records)
 
 	
 	// fmt.Printf("ID: %d, TITLE: %s", record.Id, record.Title)
-
-	data, _ := json.Marshal(record)
+	fmt.Printf("Your records:\n")
+	fmt.Printf("__________________________________________________________________________________________\n")
+	fmt.Printf("\n")
+	data, _ := json.Marshal(records)
 	fmt.Println(string(data))
+	fmt.Printf("__________________________________________________________________________________________\n")
+	fmt.Printf("\n")
 	
 
 	for {
@@ -37,16 +42,33 @@ func main() {
 			descriptionNewRecord := ""
 			fmt.Scan(&descriptionNewRecord)
 
-			createRecord()
+			createRecord(&records, titleNewRecord, descriptionNewRecord)
 		}
 	}
 }
 
-func createRecord()  {
-	
+func saveFile(records []Record)  {
+	file, err := os.Create("data.json")
+	if err != nil {
+		fmt.Printf("Ошибка создания файла", err)
+	}
+	defer file.Close()
+
+	data, _ := json.Marshal(records)
+	os.WriteFile("data.json", data, 0644)
 }
 
-func readFile(record *Record)  {
+func createRecord(record *[]Record,title string, description string)  {
+	newRecord := Record{
+		Title: title,
+		Description: description,
+	}
+
+	*record = append(*record, newRecord)
+	saveFile(records)
+}
+
+func readFile(record *[]Record)  {
 	fileData, err := os.ReadFile("data.json")
 	if err != nil {
 		fmt.Println("Ошибка чтения файла", err)
